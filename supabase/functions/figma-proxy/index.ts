@@ -49,7 +49,27 @@ serve(async (req) => {
       console.error(`Figma API error: ${responseData}`);
     }
 
-    return new Response(responseData, {
+    // Validate JSON response before sending
+    let jsonData;
+    try {
+      jsonData = JSON.parse(responseData);
+    } catch (parseError) {
+      console.error('Failed to parse Figma API response as JSON:', parseError);
+      console.error('Response data:', responseData.substring(0, 500));
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid JSON response from Figma API', 
+          details: 'The Figma API returned HTML instead of JSON. Check your API token and file permissions.',
+          status: figmaResponse.status
+        }),
+        { 
+          status: 502, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    return new Response(JSON.stringify(jsonData), {
       status: figmaResponse.status,
       headers: {
         ...corsHeaders,

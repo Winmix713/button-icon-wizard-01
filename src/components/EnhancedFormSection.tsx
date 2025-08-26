@@ -315,14 +315,13 @@ const EnhancedFormSection: React.FC<EnhancedFormSectionProps> = ({
     newApiService.setUseProxy(useProxyMode);
     
     if (!useProxyMode && formState.figmaToken) {
-      const tokenValidation = validateToken(formState.figmaToken, useProxyMode);
-      if (tokenValidation.isValid) {
+      if (newApiService.validateToken(formState.figmaToken)) {
         newApiService.setToken(formState.figmaToken);
       }
     }
     
     setApiService(newApiService);
-  }, [formState.figmaToken, useProxyMode, validateToken]);
+  }, [formState.figmaToken, useProxyMode]); // Removed validateToken from deps to prevent infinite loop
 
   // Validation states
   const urlValidation = useMemo(() => validateUrl(formState.figmaUrl), [formState.figmaUrl, validateUrl]);

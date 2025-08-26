@@ -141,7 +141,19 @@ export class FigmaApiService {
       }
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
+        let errorData = null;
+        try {
+          errorData = await response.json();
+        } catch (parseError) {
+          // If response is not JSON, try to get text for better error message
+          const errorText = await response.text().catch(() => 'Unknown error');
+          console.error('Non-JSON error response:', errorText.substring(0, 500));
+          throw new FigmaApiError(
+            `${this.getErrorMessage(response.status)} - Server returned HTML instead of JSON. Check your API token and Supabase configuration.`,
+            response.status,
+            { error: errorText.substring(0, 500) }
+          );
+        }
         throw new FigmaApiError(
           this.getErrorMessage(response.status, errorData),
           response.status,
@@ -149,7 +161,19 @@ export class FigmaApiService {
         );
       }
 
-      const data: FigmaFileResponse = await response.json();
+      let data: FigmaFileResponse;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        const responseText = await response.text().catch(() => 'Unable to read response');
+        console.error('Failed to parse JSON response:', parseError);
+        console.error('Response text:', responseText.substring(0, 500));
+        throw new FigmaApiError(
+          'Invalid JSON response from Figma API. Check your Figma API token and file permissions.',
+          500,
+          { parseError: parseError instanceof Error ? parseError.message : 'JSON parse failed' }
+        );
+      }
       
       if (data.error) {
         throw new FigmaApiError(

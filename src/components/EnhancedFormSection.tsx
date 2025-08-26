@@ -165,6 +165,15 @@ const useConversion = (
         const figmaFile = await apiService.getFile(fileId);
         console.log('Fájl sikeresen betöltve:', figmaFile.name);
         
+        // Első lépés: Részletes JSON analízis generálása
+        const { FigmaJsonGenerator } = await import('../services/figma-json-generator');
+        const jsonGenerator = new FigmaJsonGenerator(figmaFile);
+        const figmaAnalysis = jsonGenerator.generateJson();
+        
+        // JSON formátumban exportálás
+        const jsonContent = JSON.stringify(figmaAnalysis, null, 2);
+        
+        // Kód generálás
         const codeGenerator = new EnhancedCodeGenerator(figmaFile, config);
         const generatedCode = await codeGenerator.generateCode();
         
@@ -184,7 +193,8 @@ const useConversion = (
           js: generatedCode.dependencies.length > 0 ? `// Dependencies: ${generatedCode.dependencies.join(', ')}` : '',
           jsx: config.framework === 'react' ? generatedCode.component : '',
           css: generatedCode.styles,
-          layers: generateAdvancedLayerAnalysis()
+          layers: generateAdvancedLayerAnalysis(),
+          json: jsonContent // Új JSON fül hozzáadása
         };
 
         setTimeout(() => {

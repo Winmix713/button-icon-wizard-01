@@ -9,6 +9,7 @@ interface CodeTabsProps {
 
 const CodeTabs: React.FC<CodeTabsProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
+    { id: 'json' as const, label: 'JSON Info', icon: FileType },
     { id: 'html' as const, label: 'HTML', icon: null },
     { id: 'js' as const, label: 'JavaScript', icon: FileCode },
     { id: 'jsx' as const, label: 'JSX', icon: Braces },

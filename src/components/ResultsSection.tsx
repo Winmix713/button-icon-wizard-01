@@ -9,13 +9,16 @@ interface ResultsSectionProps {
 }
 
 const ResultsSection: React.FC<ResultsSectionProps> = ({ results, showToast }) => {
-  const [activeTab, setActiveTab] = useState<keyof ConversionResults>('html');
+  const [activeTab, setActiveTab] = useState<keyof ConversionResults>('json');
   const [wrapCode, setWrapCode] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(results[activeTab]);
+      const contentToCopy = activeTab === 'json' ? 
+        (results.json || '{"error": "No JSON data available"}') : 
+        results[activeTab];
+      await navigator.clipboard.writeText(contentToCopy);
       setCopied(true);
       showToast('Vágólapra másolva');
       
@@ -94,7 +97,10 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({ results, showToast }) =
           <div className="rounded-2xl bg-black/50 border border-white/10">
             <pre className="overflow-auto p-4 text-xs leading-relaxed text-white/90">
               <code className={`font-mono ${wrapCode ? 'whitespace-pre-wrap' : 'whitespace-pre'}`}>
-                {results[activeTab]}
+                {activeTab === 'json' ? 
+                  (results.json || '{"error": "No JSON data available"}') : 
+                  results[activeTab]
+                }
               </code>
             </pre>
           </div>

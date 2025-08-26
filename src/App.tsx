@@ -18,6 +18,7 @@ export interface ConversionResults {
   jsx: string;
   css: string;
   layers: string;
+  json?: string; // Új JSON mező hozzáadása
 }
 
 function App() {
